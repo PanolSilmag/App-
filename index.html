@@ -5,7 +5,7 @@
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>Inventario</title>
-  <script src="./libs/xlsx.full.min.js"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.17.0/xlsx.full.min.js"></script>
   <style>
     body { font-family: Arial, sans-serif; padding: 20px; }
     table, th, td { border: 1px solid black; border-collapse: collapse; padding: 8px; }
@@ -30,6 +30,7 @@
     <button onclick="restar()">Restar</button>
     <button onclick="editarCodigo()">Agregar/Editar Código</button>
     <button onclick="editarUbicacion()">Agregar/Editar Ubicación</button>
+    <button onclick="descargarExcel()">Descargar Excel</button>
   </div>
 
   <input type="text" id="searchInput" placeholder="Buscar por nombre o código..." oninput="buscarInventario()" />
@@ -204,6 +205,24 @@
       inventario[nombre].ubicacion = nuevaUbicacion;
       mostrarInventario();
       guardarInventario();
+    }
+
+    function descargarExcel() {
+      // Convierte el objeto inventario a un array de objetos compatible con SheetJS
+      const data = Object.entries(inventario).map(([producto, datos]) => ({
+        Producto: producto,
+        Código: datos.codigo || '—',
+        Cantidad: datos.cantidad,
+        Ubicación: datos.ubicacion || ''
+      }));
+      if (data.length === 0) {
+        alert('El inventario está vacío.');
+        return;
+      }
+      const ws = XLSX.utils.json_to_sheet(data);
+      const wb = XLSX.utils.book_new();
+      XLSX.utils.book_append_sheet(wb, ws, 'Inventario');
+      XLSX.writeFile(wb, 'Inventario_actualizado.xlsx');
     }
 
     function guardarInventario() {
